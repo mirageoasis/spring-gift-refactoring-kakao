@@ -11,6 +11,7 @@ import gift.member.Member;
 import gift.member.MemberRepository;
 import gift.option.Option;
 import gift.option.OptionRepository;
+import gift.product.Product;
 import gift.wish.WishRepository;
 
 @Transactional
@@ -69,7 +70,7 @@ public class OrderService {
             return;
         }
         try {
-            var product = option.getProduct();
+            Product product = option.getProduct();
             kakaoMessageClient.sendToMe(member.getKakaoAccessToken(), order, product);
         } catch (Exception ignored) {
         }

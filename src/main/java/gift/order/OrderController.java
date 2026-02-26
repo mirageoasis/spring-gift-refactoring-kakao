@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import gift.auth.AuthenticationResolver;
+import gift.member.Member;
 import jakarta.validation.Valid;
 
 @RestController
@@ -31,7 +32,7 @@ public class OrderController {
         Pageable pageable
     ) {
         // auth check
-        var member = authenticationResolver.extractMember(authorization);
+        Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();
         }
@@ -52,7 +53,7 @@ public class OrderController {
         @Valid @RequestBody OrderRequest request
     ) {
         // auth check
-        var member = authenticationResolver.extractMember(authorization);
+        Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();
         }

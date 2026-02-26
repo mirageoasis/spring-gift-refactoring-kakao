@@ -1,6 +1,7 @@
 package gift.wish;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,12 +33,12 @@ public class WishService {
             .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
 
         // check duplicate
-        var existing = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
+        Optional<Wish> existing = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
         if (existing.isPresent()) {
             return WishResponse.from(existing.get());
         }
 
-        var saved = wishRepository.save(new Wish(memberId, product));
+        Wish saved = wishRepository.save(new Wish(memberId, product));
         return WishResponse.from(saved);
     }
 
