@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
+/*
+ * Each product must have at least one option at all times.
+ * Option names are validated against allowed characters and length constraints.
+ */
 @RestController
 @RequestMapping(path = "/api/products/{productId}/options")
 public class OptionController {

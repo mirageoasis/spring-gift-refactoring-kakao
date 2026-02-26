@@ -27,9 +27,11 @@ public class WishService {
     }
 
     public WishResponse add(Long memberId, WishRequest request) {
+        // check product
         Product product = productRepository.findById(request.productId())
             .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
 
+        // check duplicate
         var existing = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
         if (existing.isPresent()) {
             return WishResponse.from(existing.get());

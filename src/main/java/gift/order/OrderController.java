@@ -30,6 +30,7 @@ public class OrderController {
         @RequestHeader("Authorization") String authorization,
         Pageable pageable
     ) {
+        // auth check
         var member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();
@@ -37,11 +38,20 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findByMemberId(member.getId(), pageable));
     }
 
+    // order flow:
+    // 1. auth check
+    // 2. validate option
+    // 3. subtract stock
+    // 4. deduct points
+    // 5. save order
+    // 6. cleanup wish
+    // 7. send kakao notification
     @PostMapping
     public ResponseEntity<?> createOrder(
         @RequestHeader("Authorization") String authorization,
         @Valid @RequestBody OrderRequest request
     ) {
+        // auth check
         var member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();

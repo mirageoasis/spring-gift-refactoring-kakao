@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 import gift.auth.TokenResponse;
 import jakarta.validation.Valid;
 
+/**
+ * Handles member registration and login.
+ *
+ * @author brian.kim
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api/members")
 public class MemberController {

@@ -33,6 +33,7 @@ public class WishController {
         @RequestHeader("Authorization") String authorization,
         Pageable pageable
     ) {
+        // check auth
         var member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();
@@ -45,6 +46,7 @@ public class WishController {
         @RequestHeader("Authorization") String authorization,
         @Valid @RequestBody WishRequest request
     ) {
+        // check auth
         var member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();
@@ -65,6 +67,7 @@ public class WishController {
         @RequestHeader("Authorization") String authorization,
         @PathVariable Long id
     ) {
+        // check auth
         var member = authenticationResolver.extractMember(authorization);
         if (member == null) {
             return ResponseEntity.status(401).build();

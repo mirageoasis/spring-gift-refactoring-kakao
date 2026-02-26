@@ -38,6 +38,7 @@ public class OrderService {
     }
 
     public OrderResponse create(Member member, OrderRequest request) {
+        // validate option
         Option option = optionRepository.findById(request.optionId())
             .orElseThrow(() -> new NoSuchElementException("옵션이 존재하지 않습니다."));
 
