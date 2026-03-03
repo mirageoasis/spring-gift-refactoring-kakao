@@ -90,9 +90,9 @@ Controller:
 
 **`@ControllerAdvice`로 합치는 경우** — 예외 처리 로직이 모든 Controller에서 동일할 때. 복붙은 버그의 원인이 되고, 새 Controller 추가 시 핸들러를 빠뜨릴 위험이 있다.
 
-`GlobalExceptionHandler`(`@ControllerAdvice`)에서 전역으로 처리하는 예외:
-- `IllegalArgumentException` → 400 — 기존 3개 Controller에 중복 존재하던 핸들러 통합
-- `NoSuchElementException` → 404 — 리소스 미존재 시 500 대신 404 반환 (버그 수정)
+`GlobalExceptionHandler`에서 처리하는 예외:
+- `NoSuchElementException` → 404 — 전역 `@ControllerAdvice`로 처리. 리소스 미존재 시 500 대신 404를 반환하는 버그 수정.
+- `IllegalArgumentException` → 400 — `assignableTypes`로 `MemberController`, `OptionController`, `ProductController`에만 한정 적용. 내부 static 클래스로 분리.
 
 ### 5. 리팩토링 순서 결정
 
@@ -146,6 +146,6 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 - `OrderAcceptanceTest`
 
 ### 5. @ControllerAdvice 도입
-`GlobalExceptionHandler`를 전역 `@ControllerAdvice`로 도입했다.
-- `IllegalArgumentException` → 400: 기존 3개 Controller(`MemberController`, `OptionController`, `ProductController`)에 중복 존재하던 핸들러를 통합
-- `NoSuchElementException` → 404: 기존에 핸들러가 없어 500으로 빠지던 리소스 미존재 응답을 404로 수정
+`GlobalExceptionHandler`를 도입했다.
+- `NoSuchElementException` → 404: 전역 적용. 기존에 핸들러가 없어 500으로 빠지던 리소스 미존재 응답을 404로 수정.
+- `IllegalArgumentException` → 400: `assignableTypes`로 `MemberController`, `OptionController`, `ProductController`에만 한정 적용. 내부 static 클래스로 분리.
