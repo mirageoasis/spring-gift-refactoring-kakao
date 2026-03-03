@@ -37,7 +37,7 @@
 
 | 항목 | 위치 | 이유 |
 |------|------|------|
-| `OrderController.wishRepository` | `OrderController.java:26` | 주입만 되고 사용 안 됨. 주석에 "6. cleanup wish"가 있으나 미구현 |
+| `OrderService.wishRepository` | `OrderService.java:22` | 주입만 되고 사용 안 됨. 주석에 "6. cleanup wish"가 있으나 미구현 |
 
 `Product.getOptions()`는 `open-in-view=false` 환경에서 LAZY 컬렉션의 트랜잭션 밖 접근 시 `LazyInitializationException` 발생을 검증하는 테스트(`OpenInViewTest`)를 위해 유지한다.
 
@@ -157,3 +157,9 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 `GlobalExceptionHandler`를 도입했다.
 - `NoSuchElementException` → 404: 전역 적용. 기존에 핸들러가 없어 500으로 빠지던 리소스 미존재 응답을 404로 수정.
 - `IllegalArgumentException` → 400: `assignableTypes`로 `MemberController`, `OptionController`, `ProductController`에만 한정 적용. 내부 static 클래스로 분리.
+
+### 6. 카카오 알림 트랜잭션 밖 분리
+`OrderService.create()` 안에 있던 `sendKakaoMessageIfPossible()`을 `OrderController`로 이동하여 트랜잭션 커밋 후 실행되도록 변경했다. `KakaoMessageClient` 의존성도 `OrderService`에서 `OrderController`로 이동.
+
+### 7. open-in-view=false 검증 테스트 추가
+`OpenInViewTest`를 추가하여 LAZY 컬렉션(`Product.options`)을 트랜잭션 밖에서 접근 시 `LazyInitializationException`이 발생하는 것을 검증했다.
