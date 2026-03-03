@@ -84,6 +84,14 @@ Controller:
 
 **단, 성능에 크게 문제가 없는 단순 CRUD는 클래스 레벨에 `@Transactional`을 붙이고, 필요한 메서드만 override 한다.**
 
+#### 카카오 알림을 Controller에서 호출하는 이유
+
+`@TransactionalEventListener(phase = AFTER_COMMIT)`를 사용하면 `create()`를 어디서 호출하든 알림이 자동으로 붙는 장점이 있다. 하지만 다음 이유로 도입하지 않았다.
+
+1. **알림 실패가 주문을 방해하면 안 된다.** Controller에서 best-effort로 호출하면 알림 실패가 주문 응답에 영향을 주지 않는다. 이벤트 리스너로 전환할 경우, 리스너 내 예외 처리·재시도·실패 큐 등 부수 인프라가 필요해진다.
+2. **현재 `create()`를 호출하는 곳은 `OrderController` 한 곳뿐이다.** 이벤트 발행/구독 구조는 호출처가 여러 곳일 때 의미가 있으며, 지금은 복잡도만 높인다.
+3. **코드 흐름이 명시적이다.** Controller를 읽으면 "주문 저장 → 알림 전송" 순서가 바로 보인다. 이벤트 기반은 흐름을 따라가려면 이벤트 클래스와 리스너를 찾아야 한다.
+
 ### 4. @ExceptionHandler를 언제 @ControllerAdvice로 합치는가?
 
 **Controller 안에 두는 경우** — 도메인마다 예외 처리 로직이 다를 때 (다른 상태코드, 다른 응답 형식, 다른 후처리 등)
