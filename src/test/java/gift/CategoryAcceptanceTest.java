@@ -347,7 +347,7 @@ class CategoryAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 
     @Test

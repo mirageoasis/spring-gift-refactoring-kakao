@@ -90,7 +90,9 @@ Controller:
 
 **`@ControllerAdvice`로 합치는 경우** — 예외 처리 로직이 모든 Controller에서 동일할 때. 복붙은 버그의 원인이 되고, 새 Controller 추가 시 핸들러를 빠뜨릴 위험이 있다.
 
-`IllegalArgumentException` → 400 핸들러가 `MemberController`, `OptionController`, `ProductController`에 완전히 동일한 코드로 존재했으므로 `@ControllerAdvice(assignableTypes = {...})`로 통합했다.
+`GlobalExceptionHandler`(`@ControllerAdvice`)에서 전역으로 처리하는 예외:
+- `IllegalArgumentException` → 400 — 기존 3개 Controller에 중복 존재하던 핸들러 통합
+- `NoSuchElementException` → 404 — 리소스 미존재 시 500 대신 404 반환 (버그 수정)
 
 ### 5. 리팩토링 순서 결정
 
@@ -143,5 +145,7 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 - `WishAcceptanceTest`
 - `OrderAcceptanceTest`
 
-### 5. @ExceptionHandler를 @ControllerAdvice로 통합
-`MemberController`, `OptionController`, `ProductController`에 동일한 `IllegalArgumentException` 핸들러가 중복 존재했다. 로직이 완전히 동일하므로 `GlobalExceptionHandler`(`@ControllerAdvice`)로 통합하고, `assignableTypes`로 적용 대상을 기존 3개 Controller로 한정했다.
+### 5. @ControllerAdvice 도입
+`GlobalExceptionHandler`를 전역 `@ControllerAdvice`로 도입했다.
+- `IllegalArgumentException` → 400: 기존 3개 Controller(`MemberController`, `OptionController`, `ProductController`)에 중복 존재하던 핸들러를 통합
+- `NoSuchElementException` → 404: 기존에 핸들러가 없어 500으로 빠지던 리소스 미존재 응답을 404로 수정

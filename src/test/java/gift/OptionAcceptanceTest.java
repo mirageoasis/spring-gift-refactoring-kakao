@@ -142,7 +142,7 @@ class OptionAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 
     // ── 옵션 생성 ──
@@ -184,7 +184,7 @@ class OptionAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 
     @Test
@@ -339,7 +339,7 @@ class OptionAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 
     @Test
@@ -357,7 +357,7 @@ class OptionAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 
     @Test
@@ -377,6 +377,6 @@ class OptionAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(404);
     }
 }
