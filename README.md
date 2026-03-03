@@ -39,7 +39,7 @@
 |------|------|------|
 | `OrderController.wishRepository` | `OrderController.java:26` | 주입만 되고 사용 안 됨. 주석에 "6. cleanup wish"가 있으나 미구현 |
 
-`Product.getOptions()`와 `Order.getMemberId()`는 현재 호출처가 없으나, 추후 확장성을 고려하여 제거하지 않는다.
+`Product.getOptions()`는 `open-in-view=false` 환경에서 LAZY 컬렉션의 트랜잭션 밖 접근 시 `LazyInitializationException` 발생을 검증하는 테스트(`OpenInViewTest`)를 위해 유지한다.
 
 **Service 계층 부재**
 - Service 클래스가 프로젝트에 하나도 없음
