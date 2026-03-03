@@ -84,10 +84,13 @@ Controller:
 
 **단, 성능에 크게 문제가 없는 단순 CRUD는 클래스 레벨에 `@Transactional`을 붙이고, 필요한 메서드만 override 한다.**
 
-### 4. @ExceptionHandler를 왜 Controller 안에 두는가?
+### 4. @ExceptionHandler를 언제 @ControllerAdvice로 합치는가?
 
-- 예외 처리는 각 도메인의 책임이므로 Controller 안에 둔다.
-- `@ControllerAdvice`에 패키지 지정이 가능하지만, 현재 exception handler가 많지 않아서 중앙에서 관리할 필요성이 없다.
+**Controller 안에 두는 경우** — 도메인마다 예외 처리 로직이 다를 때 (다른 상태코드, 다른 응답 형식, 다른 후처리 등)
+
+**`@ControllerAdvice`로 합치는 경우** — 예외 처리 로직이 모든 Controller에서 동일할 때. 복붙은 버그의 원인이 되고, 새 Controller 추가 시 핸들러를 빠뜨릴 위험이 있다.
+
+`IllegalArgumentException` → 400 핸들러가 `MemberController`, `OptionController`, `ProductController`에 완전히 동일한 코드로 존재했으므로 `@ControllerAdvice(assignableTypes = {...})`로 통합했다.
 
 ### 5. 리팩토링 순서 결정
 
@@ -140,5 +143,5 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 - `WishAcceptanceTest`
 - `OrderAcceptanceTest`
 
-### 5. @ExceptionHandler 유지
-`MemberController`, `OptionController`, `ProductController`에 동일한 `@ExceptionHandler`가 존재하지만, 예외 처리는 각 도메인의 책임이므로 Controller 안에 유지한다. `@ControllerAdvice`에 패키지 지정이 가능하지만, 현재 handler가 많지 않아 중앙 관리할 필요성이 없다.
+### 5. @ExceptionHandler를 @ControllerAdvice로 통합
+`MemberController`, `OptionController`, `ProductController`에 동일한 `IllegalArgumentException` 핸들러가 중복 존재했다. 로직이 완전히 동일하므로 `GlobalExceptionHandler`(`@ControllerAdvice`)로 통합하고, `assignableTypes`로 적용 대상을 기존 3개 Controller로 한정했다.
