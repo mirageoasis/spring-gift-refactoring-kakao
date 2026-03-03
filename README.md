@@ -4,9 +4,17 @@
 
 > 구조 변경을 통해 변경 난이도를 낮추되 작동은 유지한다.
 
-## 사용한 Claude 스킬
+## 사용한 Claude Code 스킬
 
-| 스킬 | 설명 | 결과 |
+| 스킬 | 설명 |
+|------|------|
+| `acceptence-test-writer` | RestAssured 기반 E2E 인수 테스트를 작성한다. TEST_STRATEGY.md와 CLAUDE.md의 시나리오 매트릭스를 기반으로 성공/실패 케이스를 given-when-then 구조로 생성한다. |
+| `junit5-test-reference` | JUnit 5 단위/통합 테스트를 생성한다. Assertions, Parameterized Tests, Mockito, Nested Tests 등 패턴 레퍼런스를 포함한다. |
+| `logical-commit` | 변경 사항을 논리적 작업 단위로 분류하여 각각 별도의 커밋으로 생성한다. git status/diff를 분석하고, 관련 파일을 그룹핑하여 의미 있는 커밋 메시지와 함께 커밋한다. |
+
+## 분석 작업 내역
+
+| 작업 | 설명 | 결과 |
 |------|------|------|
 | 미사용 코드 탐지 | 전체 소스 파일을 읽고, 각 메서드/필드의 호출처를 검색하여 사용 여부 판별 | `Product.getOptions()`, `Order.getMemberId()`, `OrderController.wishRepository` 발견 |
 | API 엔드포인트 목록 추출 | `@GetMapping`, `@PostMapping` 등 어노테이션을 grep하여 전체 API 목록 도출 | REST 18개 + Admin 13개 = 31개 엔드포인트 정리 |
