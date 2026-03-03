@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gift.auth.AuthenticationResolver;
 import gift.member.Member;
+import gift.product.Product;
 import jakarta.validation.Valid;
 
 @RestController
@@ -20,10 +21,16 @@ import jakarta.validation.Valid;
 public class OrderController {
     private final OrderService orderService;
     private final AuthenticationResolver authenticationResolver;
+    private final KakaoMessageClient kakaoMessageClient;
 
-    public OrderController(OrderService orderService, AuthenticationResolver authenticationResolver) {
+    public OrderController(
+        OrderService orderService,
+        AuthenticationResolver authenticationResolver,
+        KakaoMessageClient kakaoMessageClient
+    ) {
         this.orderService = orderService;
         this.authenticationResolver = authenticationResolver;
+        this.kakaoMessageClient = kakaoMessageClient;
     }
 
     @GetMapping
@@ -58,9 +65,24 @@ public class OrderController {
             return ResponseEntity.status(401).build();
         }
 
-        OrderResponse response = orderService.create(member, request);
+        Order order = orderService.create(member, request);
+
+        // best-effort kakao notification (outside transaction)
+        sendKakaoMessageIfPossible(member, order);
+
+        OrderResponse response = OrderResponse.from(order);
         return ResponseEntity.created(URI.create("/api/orders/" + response.id()))
             .body(response);
     }
 
+    private void sendKakaoMessageIfPossible(Member member, Order order) {
+        if (member.getKakaoAccessToken() == null) {
+            return;
+        }
+        try {
+            Product product = order.getOption().getProduct();
+            kakaoMessageClient.sendToMe(member.getKakaoAccessToken(), order, product);
+        } catch (Exception ignored) {
+        }
+    }
 }
