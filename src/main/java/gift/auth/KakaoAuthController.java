@@ -46,7 +46,7 @@ public class KakaoAuthController {
 
     @GetMapping(path = "/callback")
     public ResponseEntity<TokenResponse> callback(@RequestParam("code") String code) {
-        TokenResponse token = kakaoAuthService.processCallback(code);
-        return ResponseEntity.ok(token);
+        String token = kakaoAuthService.processCallback(code);
+        return ResponseEntity.ok(new TokenResponse(token));
     }
 }

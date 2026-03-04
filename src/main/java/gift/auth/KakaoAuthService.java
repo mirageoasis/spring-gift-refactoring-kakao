@@ -23,7 +23,7 @@ public class KakaoAuthService {
         this.jwtProvider = jwtProvider;
     }
 
-    public TokenResponse processCallback(String code) {
+    public String processCallback(String code) {
         KakaoLoginClient.KakaoTokenResponse kakaoToken = kakaoLoginClient.requestAccessToken(code);
         KakaoLoginClient.KakaoUserResponse kakaoUser = kakaoLoginClient.requestUserInfo(kakaoToken.accessToken());
         String email = kakaoUser.email();
@@ -33,7 +33,6 @@ public class KakaoAuthService {
         member.updateKakaoAccessToken(kakaoToken.accessToken());
         memberRepository.save(member);
 
-        String token = jwtProvider.createToken(member.getEmail());
-        return new TokenResponse(token);
+        return jwtProvider.createToken(member.getEmail());
     }
 }
