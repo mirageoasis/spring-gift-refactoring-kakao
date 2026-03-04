@@ -29,7 +29,9 @@ public class OptionController {
 
     @GetMapping
     public ResponseEntity<List<OptionResponse>> getOptions(@PathVariable Long productId) {
-        return ResponseEntity.ok(optionService.findByProductId(productId));
+        return ResponseEntity.ok(optionService.findByProductId(productId).stream()
+            .map(OptionResponse::from)
+            .toList());
     }
 
     @PostMapping
@@ -37,7 +39,8 @@ public class OptionController {
         @PathVariable Long productId,
         @Valid @RequestBody OptionRequest request
     ) {
-        OptionResponse response = optionService.create(productId, request);
+        Option option = optionService.create(productId, request);
+        OptionResponse response = OptionResponse.from(option);
         URI location = URI.create("/api/products/" + productId + "/options/" + response.id());
         return ResponseEntity.created(location).body(response);
     }

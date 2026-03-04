@@ -21,14 +21,12 @@ public class OptionService {
     }
 
     @Transactional(readOnly = true)
-    public List<OptionResponse> findByProductId(Long productId) {
+    public List<Option> findByProductId(Long productId) {
         validateProductExists(productId);
-        return optionRepository.findByProductId(productId).stream()
-            .map(OptionResponse::from)
-            .toList();
+        return optionRepository.findByProductId(productId);
     }
 
-    public OptionResponse create(Long productId, OptionRequest request) {
+    public Option create(Long productId, OptionRequest request) {
         validateName(request.name());
         Product product = findProduct(productId);
 
@@ -36,8 +34,7 @@ public class OptionService {
             throw new IllegalArgumentException("이미 존재하는 옵션명입니다.");
         }
 
-        Option saved = optionRepository.save(new Option(product, request.name(), request.quantity()));
-        return OptionResponse.from(saved);
+        return optionRepository.save(new Option(product, request.name(), request.quantity()));
     }
 
     public void delete(Long productId, Long optionId) {
