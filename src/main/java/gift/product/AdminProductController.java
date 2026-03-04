@@ -31,7 +31,7 @@ public class AdminProductController {
 
     @GetMapping("/new")
     public String newForm(Model model) {
-        model.addAttribute("categories", categoryService.findAllEntities());
+        model.addAttribute("categories", categoryService.findAll());
         return "product/new";
     }
 
@@ -56,7 +56,7 @@ public class AdminProductController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("product", productService.getById(id));
-        model.addAttribute("categories", categoryService.findAllEntities());
+        model.addAttribute("categories", categoryService.findAll());
         return "product/edit";
     }
 
@@ -100,7 +100,7 @@ public class AdminProductController {
         model.addAttribute("price", price);
         model.addAttribute("imageUrl", imageUrl);
         model.addAttribute("categoryId", categoryId);
-        model.addAttribute("categories", categoryService.findAllEntities());
+        model.addAttribute("categories", categoryService.findAll());
     }
 
     private void populateEditForm(
@@ -118,6 +118,6 @@ public class AdminProductController {
         model.addAttribute("price", price);
         model.addAttribute("imageUrl", imageUrl);
         model.addAttribute("categoryId", categoryId);
-        model.addAttribute("categories", categoryService.findAllEntities());
+        model.addAttribute("categories", categoryService.findAll());
     }
 }
