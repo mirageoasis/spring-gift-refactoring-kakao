@@ -23,36 +23,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> findAll(Pageable pageable) {
-        return productRepository.findAll(pageable).map(ProductResponse::from);
-    }
-
-    @Transactional(readOnly = true)
-    public ProductResponse findById(Long id) {
-        Product product = productRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
-        return ProductResponse.from(product);
-    }
-
-    public ProductResponse create(ProductRequest request) {
-        validateName(request.name());
-        Category category = findCategory(request.categoryId());
-        Product saved = productRepository.save(request.toEntity(category));
-        return ProductResponse.from(saved);
-    }
-
-    public ProductResponse update(Long id, ProductRequest request) {
-        validateName(request.name());
-        Category category = findCategory(request.categoryId());
-        Product product = productRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
-        product.update(request.name(), request.price(), request.imageUrl(), category);
-        productRepository.save(product);
-        return ProductResponse.from(product);
-    }
-
-    public void delete(Long id) {
-        productRepository.deleteById(id);
+    public Page<Product> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -61,9 +33,34 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public Product findById(Long id) {
+        return productRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
+    }
+
+    @Transactional(readOnly = true)
     public Product getById(Long id) {
         return productRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다. id=" + id));
+    }
+
+    public Product create(ProductRequest request) {
+        validateName(request.name());
+        Category category = findCategory(request.categoryId());
+        return productRepository.save(request.toEntity(category));
+    }
+
+    public Product update(Long id, ProductRequest request) {
+        validateName(request.name());
+        Category category = findCategory(request.categoryId());
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
+        product.update(request.name(), request.price(), request.imageUrl(), category);
+        return productRepository.save(product);
+    }
+
+    public void delete(Long id) {
+        productRepository.deleteById(id);
     }
 
     public Product create(String name, int price, String imageUrl, Long categoryId) {

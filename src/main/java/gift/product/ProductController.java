@@ -27,17 +27,17 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getProducts(Pageable pageable) {
-        return ResponseEntity.ok(productService.findAll(pageable));
+        return ResponseEntity.ok(productService.findAll(pageable).map(ProductResponse::from));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.findById(id));
+        return ResponseEntity.ok(ProductResponse.from(productService.findById(id)));
     }
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
-        ProductResponse response = productService.create(request);
+        ProductResponse response = ProductResponse.from(productService.create(request));
         return ResponseEntity.created(URI.create("/api/products/" + response.id()))
             .body(response);
     }
@@ -47,7 +47,7 @@ public class ProductController {
         @PathVariable Long id,
         @Valid @RequestBody ProductRequest request
     ) {
-        return ResponseEntity.ok(productService.update(id, request));
+        return ResponseEntity.ok(ProductResponse.from(productService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
