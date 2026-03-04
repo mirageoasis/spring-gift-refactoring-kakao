@@ -55,6 +55,31 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
+    public List<Product> findAll() {
+        return productRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Product getById(Long id) {
+        return productRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다. id=" + id));
+    }
+
+    public Product create(String name, int price, String imageUrl, Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다. id=" + categoryId));
+        return productRepository.save(new Product(name, price, imageUrl, category));
+    }
+
+    public Product update(Long id, String name, int price, String imageUrl, Long categoryId) {
+        Product product = getById(id);
+        Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다. id=" + categoryId));
+        product.update(name, price, imageUrl, category);
+        return product;
+    }
+
     private Category findCategory(Long categoryId) {
         return categoryRepository.findById(categoryId)
             .orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));

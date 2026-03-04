@@ -38,4 +38,9 @@ public class CategoryService {
     public void delete(Long id) {
         categoryRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<Category> findAllEntities() {
+        return categoryRepository.findAll();
+    }
 }
