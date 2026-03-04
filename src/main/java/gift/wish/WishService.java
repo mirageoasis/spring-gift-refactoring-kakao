@@ -23,11 +23,11 @@ public class WishService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WishResponse> findByMemberId(Long memberId, Pageable pageable) {
-        return wishRepository.findByMemberId(memberId, pageable).map(WishResponse::from);
+    public Page<Wish> findByMemberId(Long memberId, Pageable pageable) {
+        return wishRepository.findByMemberId(memberId, pageable);
     }
 
-    public WishResponse add(Long memberId, WishRequest request) {
+    public Wish add(Long memberId, WishRequest request) {
         // check product
         Product product = productRepository.findById(request.productId())
             .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
@@ -35,11 +35,10 @@ public class WishService {
         // check duplicate
         Optional<Wish> existing = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
         if (existing.isPresent()) {
-            return WishResponse.from(existing.get());
+            return existing.get();
         }
 
-        Wish saved = wishRepository.save(new Wish(memberId, product));
-        return WishResponse.from(saved);
+        return wishRepository.save(new Wish(memberId, product));
     }
 
     public boolean isDuplicate(Long memberId, Long productId) {

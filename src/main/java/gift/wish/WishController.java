@@ -39,7 +39,7 @@ public class WishController {
         if (member == null) {
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(wishService.findByMemberId(member.getId(), pageable));
+        return ResponseEntity.ok(wishService.findByMemberId(member.getId(), pageable).map(WishResponse::from));
     }
 
     @PostMapping
@@ -54,7 +54,8 @@ public class WishController {
         }
 
         boolean duplicate = wishService.isDuplicate(member.getId(), request.productId());
-        WishResponse response = wishService.add(member.getId(), request);
+        Wish wish = wishService.add(member.getId(), request);
+        WishResponse response = WishResponse.from(wish);
 
         if (duplicate) {
             return ResponseEntity.ok(response);
