@@ -27,11 +27,13 @@ public class MemberController {
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@Valid @RequestBody MemberRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.register(request));
+        String token = memberService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new TokenResponse(token));
     }
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody MemberRequest request) {
-        return ResponseEntity.ok(memberService.login(request));
+        String token = memberService.login(request);
+        return ResponseEntity.ok(new TokenResponse(token));
     }
 }
