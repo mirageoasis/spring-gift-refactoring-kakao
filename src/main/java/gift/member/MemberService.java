@@ -1,5 +1,8 @@
 package gift.member;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,5 +40,37 @@ public class MemberService {
 
         String token = jwtProvider.createToken(member.getEmail());
         return new TokenResponse(token);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> findAll() {
+        return memberRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Member findById(Long id) {
+        return memberRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Member not found. id=" + id));
+    }
+
+    public Member create(String email, String password) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already registered.");
+        }
+        return memberRepository.save(new Member(email, password));
+    }
+
+    public void update(Long id, String email, String password) {
+        Member member = findById(id);
+        member.update(email, password);
+    }
+
+    public void chargePoint(Long id, int amount) {
+        Member member = findById(id);
+        member.chargePoint(amount);
+    }
+
+    public void delete(Long id) {
+        memberRepository.deleteById(id);
     }
 }
