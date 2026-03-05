@@ -69,10 +69,9 @@ public class AdminProductController {
         @RequestParam Long categoryId,
         Model model
     ) {
-        Product product = productService.getById(id);
-
         List<String> errors = ProductNameValidator.validate(name, true);
         if (!errors.isEmpty()) {
+            Product product = productService.getById(id);
             populateEditForm(model, product, errors, name, price, imageUrl, categoryId);
             return "product/edit";
         }
