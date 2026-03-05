@@ -11,25 +11,25 @@ import gift.member.Member;
 import gift.member.MemberRepository;
 import gift.option.Option;
 import gift.option.OptionRepository;
-import gift.wish.WishRepository;
+import gift.wish.WishService;
 
 @Transactional
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OptionRepository optionRepository;
-	private final WishRepository wishRepository;
+    private final WishService wishService;
     private final MemberRepository memberRepository;
 
     public OrderService(
         OrderRepository orderRepository,
         OptionRepository optionRepository,
-		WishRepository wishRepository,
+        WishService wishService,
         MemberRepository memberRepository
     ) {
         this.orderRepository = orderRepository;
         this.optionRepository = optionRepository;
-		this.wishRepository = wishRepository;
+        this.wishService = wishService;
         this.memberRepository = memberRepository;
     }
 
@@ -55,8 +55,7 @@ public class OrderService {
         memberRepository.save(member);
 
         // cleanup wish
-        wishRepository.findByMemberIdAndProductId(member.getId(), option.getProduct().getId())
-            .ifPresent(wishRepository::delete);
+        wishService.removeByMemberAndProduct(member.getId(), option.getProduct().getId());
 
         return order;
     }

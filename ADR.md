@@ -170,9 +170,12 @@ Service 계층을 도입(ADR-001)하면서 Controller에 있던 로직이 Servic
 - 엔티티가 던지는 예외 타입은 기존과 동일하게 유지한다.
 - `Wish.validateOwnership()`이 던지는 `IllegalAccessException`은 `WishService` 내부 클래스에서 wish 패키지의 독립 클래스로 분리하여, 엔티티→서비스 역방향 의존을 제거했다.
 
+### 추가 적용: OrderService → WishService 위임
+`OrderService`가 `WishRepository`를 직접 호출하여 wish를 삭제하던 것을 `WishService.removeByMemberAndProduct()`로 위임했다.
+도메인 경계를 넘는 Repository 직접 조작을 제거하여, wish 삭제 로직이 변경되더라도 `WishService` 한 곳만 수정하면 된다.
+
 ### 보류 항목
 
 | 항목 | 보류 이유 |
 |------|-----------|
 | `MemberService` 이메일 중복 검사 — `register()`와 `create()`에 동일 로직 반복 | 호출처가 2곳뿐이라 공통 메서드 추출의 실익이 작음. 호출처가 늘어나면 재검토 |
-| `OrderService`에서 `wishRepository` 직접 호출하여 wish 삭제 | 호출처가 1곳뿐이라 `WishService` 위임의 실익이 작음. wish 삭제 로직이 복잡해지면 재검토 |

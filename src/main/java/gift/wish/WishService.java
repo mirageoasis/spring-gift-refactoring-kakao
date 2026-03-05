@@ -41,6 +41,11 @@ public class WishService {
         return new WishResult(wishRepository.save(new Wish(memberId, product)), true);
     }
 
+    public void removeByMemberAndProduct(Long memberId, Long productId) {
+        wishRepository.findByMemberIdAndProductId(memberId, productId)
+            .ifPresent(wishRepository::delete);
+    }
+
     public void remove(Long memberId, Long wishId) {
         Wish wish = wishRepository.findById(wishId)
             .orElseThrow(() -> new NoSuchElementException("위시가 존재하지 않습니다."));
