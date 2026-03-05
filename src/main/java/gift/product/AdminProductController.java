@@ -55,7 +55,7 @@ public class AdminProductController {
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
-        model.addAttribute("product", productService.getById(id));
+        model.addAttribute("product", productService.adminFindById(id));
         model.addAttribute("categories", categoryService.findAll());
         return "product/edit";
     }
@@ -71,7 +71,7 @@ public class AdminProductController {
     ) {
         List<String> errors = ProductNameValidator.validate(name, true);
         if (!errors.isEmpty()) {
-            Product product = productService.getById(id);
+            Product product = productService.adminFindById(id);
             populateEditForm(model, product, errors, name, price, imageUrl, categoryId);
             return "product/edit";
         }
