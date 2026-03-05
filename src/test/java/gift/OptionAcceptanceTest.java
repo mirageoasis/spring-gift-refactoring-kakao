@@ -283,6 +283,128 @@ class OptionAcceptanceTest {
             .statusCode(400);
     }
 
+    // ── 옵션 수정 ──
+
+    @Test
+    void 옵션_수정_성공() {
+        // given
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId);
+        Long optionId = createOption(productId, "기본", 100);
+        var request = Map.of("name", "변경된 옵션", "quantity", 200);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/" + productId + "/options/" + optionId);
+
+        // then
+        response.then()
+            .statusCode(200)
+            .body("id", equalTo(optionId.intValue()))
+            .body("name", equalTo("변경된 옵션"))
+            .body("quantity", equalTo(200));
+    }
+
+    @Test
+    void 옵션_수정_실패_존재하지_않는_상품() {
+        // given
+        var request = Map.of("name", "변경", "quantity", 100);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/999999/options/1");
+
+        // then
+        response.then()
+            .statusCode(404);
+    }
+
+    @Test
+    void 옵션_수정_실패_존재하지_않는_옵션() {
+        // given
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId);
+        var request = Map.of("name", "변경", "quantity", 100);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/" + productId + "/options/999999");
+
+        // then
+        response.then()
+            .statusCode(404);
+    }
+
+    @Test
+    void 옵션_수정_실패_이름_중복() {
+        // given
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId);
+        createOption(productId, "옵션A", 100);
+        Long optionB = createOption(productId, "옵션B", 50);
+        var request = Map.of("name", "옵션A", "quantity", 50);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/" + productId + "/options/" + optionB);
+
+        // then
+        response.then()
+            .statusCode(400);
+    }
+
+    @Test
+    void 옵션_수정_실패_이름_누락() {
+        // given
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId);
+        Long optionId = createOption(productId, "기본", 100);
+        var request = Map.of("quantity", 100);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/" + productId + "/options/" + optionId);
+
+        // then
+        response.then()
+            .statusCode(400);
+    }
+
+    @Test
+    void 옵션_수정_실패_수량_0이하() {
+        // given
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId);
+        Long optionId = createOption(productId, "기본", 100);
+        var request = Map.of("name", "기본", "quantity", 0);
+
+        // when
+        var response = given()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when()
+            .put("/api/products/" + productId + "/options/" + optionId);
+
+        // then
+        response.then()
+            .statusCode(400);
+    }
+
     // ── 옵션 삭제 ──
 
     @Test

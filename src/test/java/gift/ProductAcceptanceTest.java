@@ -279,6 +279,102 @@ class ProductAcceptanceTest {
     }
 
     @Test
+    void 상품_목록_조회_두번째_페이지() {
+        // given
+        Long categoryId = createCategory("전자기기");
+        for (int i = 1; i <= 5; i++) {
+            createProduct("상품" + i, 1000 * i, "https://example.com/" + i + ".jpg", categoryId);
+        }
+
+        // when
+        var response = given()
+            .queryParam("page", 1)
+            .queryParam("size", 2)
+            .when()
+            .get("/api/products");
+
+        // then
+        response.then()
+            .statusCode(200)
+            .body("content", hasSize(2))
+            .body("totalElements", equalTo(5))
+            .body("totalPages", equalTo(3))
+            .body("number", equalTo(1));
+    }
+
+    @Test
+    void 상품_목록_조회_정렬() {
+        // given
+        Long categoryId = createCategory("전자기기");
+        createProduct("바나나", 3000, "https://example.com/b.jpg", categoryId);
+        createProduct("사과", 1000, "https://example.com/a.jpg", categoryId);
+        createProduct("귤", 2000, "https://example.com/c.jpg", categoryId);
+
+        // when — 이름 오름차순 정렬
+        var response = given()
+            .queryParam("sort", "name,asc")
+            .when()
+            .get("/api/products");
+
+        // then
+        response.then()
+            .statusCode(200)
+            .body("content", hasSize(3))
+            .body("content[0].name", equalTo("귤"))
+            .body("content[1].name", equalTo("바나나"))
+            .body("content[2].name", equalTo("사과"));
+    }
+
+    @Test
+    void 상품_목록_조회_카테고리_필터링() {
+        // given
+        Long catA = createCategory("전자기기");
+        Long catB = createCategory("식품");
+        createProduct("노트북", 1000000, "https://example.com/laptop.jpg", catA);
+        createProduct("키보드", 50000, "https://example.com/kb.jpg", catA);
+        createProduct("사과", 3000, "https://example.com/apple.jpg", catB);
+
+        // when — catA만 필터링
+        var response = given()
+            .queryParam("categoryId", catA)
+            .when()
+            .get("/api/products");
+
+        // then
+        response.then()
+            .statusCode(200)
+            .body("content", hasSize(2))
+            .body("totalElements", equalTo(2));
+    }
+
+    @Test
+    void 상품_목록_조회_카테고리_필터링_페이지네이션_조합() {
+        // given
+        Long catA = createCategory("전자기기");
+        Long catB = createCategory("식품");
+        for (int i = 1; i <= 5; i++) {
+            createProduct("전자" + i, 1000 * i, "https://example.com/e" + i + ".jpg", catA);
+        }
+        createProduct("사과", 3000, "https://example.com/apple.jpg", catB);
+
+        // when — catA, size=2, page=1
+        var response = given()
+            .queryParam("categoryId", catA)
+            .queryParam("page", 1)
+            .queryParam("size", 2)
+            .when()
+            .get("/api/products");
+
+        // then
+        response.then()
+            .statusCode(200)
+            .body("content", hasSize(2))
+            .body("totalElements", equalTo(5))
+            .body("totalPages", equalTo(3))
+            .body("number", equalTo(1));
+    }
+
+    @Test
     void 상품_단건_조회_성공() {
         // given
         Long categoryId = createCategory("전자기기");
