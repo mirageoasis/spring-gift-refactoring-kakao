@@ -37,6 +37,23 @@ public class OptionService {
         return optionRepository.save(new Option(product, request.name(), request.quantity()));
     }
 
+    public Option update(Long productId, Long optionId, OptionRequest request) {
+        validateName(request.name());
+        validateProductExists(productId);
+
+        Option option = optionRepository.findById(optionId)
+            .filter(o -> o.getProduct().getId().equals(productId))
+            .orElseThrow(() -> new NoSuchElementException("옵션이 존재하지 않습니다."));
+
+        if (!option.getName().equals(request.name())
+            && optionRepository.existsByProductIdAndName(productId, request.name())) {
+            throw new IllegalArgumentException("이미 존재하는 옵션명입니다.");
+        }
+
+        option.update(request.name(), request.quantity());
+        return option;
+    }
+
     public void delete(Long productId, Long optionId) {
         validateProductExists(productId);
 
