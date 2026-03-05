@@ -1,6 +1,8 @@
 package gift.member;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +26,9 @@ public class Member {
     private String kakaoAccessToken;
 
     private int point;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
 
     protected Member() {
     }
@@ -86,5 +91,13 @@ public class Member {
 
     public int getPoint() {
         return point;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
     }
 }
