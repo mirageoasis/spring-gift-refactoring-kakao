@@ -10,6 +10,15 @@
 |--------|------|------|
 | `DELETE` | `/api/categories/{id}` | 카테고리 삭제 |
 
+## User API / Admin API 구분
+
+`ProductService`는 동일한 상품 조회를 두 가지 메서드로 제공한다.
+
+| 메서드 | 호출처 | 에러 메시지 | 이유 |
+|--------|--------|-------------|------|
+| `findById(id)` | REST API (`ProductController`) | `"상품이 존재하지 않습니다."` | 사용자에게 노출되는 메시지이므로 내부 정보를 숨김 |
+| `getById(id)` | Admin (`AdminProductController`) | `"상품이 존재하지 않습니다. id=123"` | 관리자 디버깅용으로 id를 포함 |
+
 ## 사용한 Claude Code 스킬
 
 | 스킬 | 설명 |
