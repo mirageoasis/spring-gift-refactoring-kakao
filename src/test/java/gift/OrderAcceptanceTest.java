@@ -332,7 +332,7 @@ class OrderAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(400);
     }
 
     @Test
@@ -354,7 +354,7 @@ class OrderAcceptanceTest {
 
         // then
         response.then()
-            .statusCode(500);
+            .statusCode(400);
     }
 
     @Test
