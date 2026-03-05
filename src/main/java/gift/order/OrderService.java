@@ -47,13 +47,12 @@ public class OrderService {
         option.subtractQuantity(request.quantity());
         optionRepository.save(option);
 
-        // deduct points
-        int price = option.getProduct().getPrice() * request.quantity();
-        member.deductPoint(price);
-        memberRepository.save(member);
-
         // save order
         Order order = orderRepository.save(new Order(option, member.getId(), request.quantity(), request.message()));
+
+        // deduct points
+        member.deductPoint(order.calculatePrice());
+        memberRepository.save(member);
 
         // cleanup wish
         wishRepository.findByMemberIdAndProductId(member.getId(), option.getProduct().getId())
