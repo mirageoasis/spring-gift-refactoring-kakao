@@ -53,11 +53,10 @@ public class WishController {
             return ResponseEntity.status(401).build();
         }
 
-        boolean duplicate = wishService.isDuplicate(member.getId(), request.productId());
-        Wish wish = wishService.add(member.getId(), request);
-        WishResponse response = WishResponse.from(wish);
+        WishResult result = wishService.add(member.getId(), request);
+        WishResponse response = WishResponse.from(result.getWish());
 
-        if (duplicate) {
+        if (!result.isCreated()) {
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.created(URI.create("/api/wishes/" + response.id()))

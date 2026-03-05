@@ -27,7 +27,7 @@ public class WishService {
         return wishRepository.findByMemberId(memberId, pageable);
     }
 
-    public Wish add(Long memberId, WishRequest request) {
+    public WishResult add(Long memberId, WishRequest request) {
         // check product
         Product product = productRepository.findById(request.productId())
             .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
@@ -35,14 +35,10 @@ public class WishService {
         // check duplicate
         Optional<Wish> existing = wishRepository.findByMemberIdAndProductId(memberId, product.getId());
         if (existing.isPresent()) {
-            return existing.get();
+            return new WishResult(existing.get(), false);
         }
 
-        return wishRepository.save(new Wish(memberId, product));
-    }
-
-    public boolean isDuplicate(Long memberId, Long productId) {
-        return wishRepository.findByMemberIdAndProductId(memberId, productId).isPresent();
+        return new WishResult(wishRepository.save(new Wish(memberId, product)), true);
     }
 
     public void remove(Long memberId, Long wishId) {
