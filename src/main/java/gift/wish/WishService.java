@@ -45,16 +45,8 @@ public class WishService {
         Wish wish = wishRepository.findById(wishId)
             .orElseThrow(() -> new NoSuchElementException("위시가 존재하지 않습니다."));
 
-        if (!wish.getMemberId().equals(memberId)) {
-            throw new IllegalAccessException("다른 회원의 위시를 삭제할 수 없습니다.");
-        }
+        wish.validateOwnership(memberId);
 
         wishRepository.delete(wish);
-    }
-
-    public static class IllegalAccessException extends RuntimeException {
-        public IllegalAccessException(String message) {
-            super(message);
-        }
     }
 }

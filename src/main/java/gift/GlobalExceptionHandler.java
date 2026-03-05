@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import gift.auth.MissingAuthorizationException;
 import gift.auth.UnauthorizedException;
-import gift.wish.WishService;
+import gift.wish.IllegalAccessException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    @ExceptionHandler(WishService.IllegalAccessException.class)
-    public ResponseEntity<String> handleIllegalAccess(WishService.IllegalAccessException e) {
+    @ExceptionHandler(IllegalAccessException.class)
+    public ResponseEntity<String> handleIllegalAccess(IllegalAccessException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 }
