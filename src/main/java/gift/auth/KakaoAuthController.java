@@ -19,13 +19,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping(path = "/api/auth/kakao")
 public class KakaoAuthController {
     private final KakaoLoginProperties properties;
+    private final KakaoLoginClient kakaoLoginClient;
     private final KakaoAuthService kakaoAuthService;
 
     public KakaoAuthController(
         KakaoLoginProperties properties,
+        KakaoLoginClient kakaoLoginClient,
         KakaoAuthService kakaoAuthService
     ) {
         this.properties = properties;
+        this.kakaoLoginClient = kakaoLoginClient;
         this.kakaoAuthService = kakaoAuthService;
     }
 
@@ -46,7 +49,9 @@ public class KakaoAuthController {
 
     @GetMapping(path = "/callback")
     public ResponseEntity<TokenResponse> callback(@RequestParam("code") String code) {
-        String token = kakaoAuthService.processCallback(code);
+        var kakaoToken = kakaoLoginClient.requestAccessToken(code);
+        String email = kakaoLoginClient.requestUserInfo(kakaoToken.accessToken()).email();
+        String token = kakaoAuthService.loginOrRegister(email, kakaoToken.accessToken());
         return ResponseEntity.ok(new TokenResponse(token));
     }
 }

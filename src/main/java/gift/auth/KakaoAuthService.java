@@ -6,33 +6,25 @@ import org.springframework.transaction.annotation.Transactional;
 import gift.member.Member;
 import gift.member.MemberRepository;
 
-@Transactional
 @Service
 public class KakaoAuthService {
-    private final KakaoLoginClient kakaoLoginClient;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
     public KakaoAuthService(
-        KakaoLoginClient kakaoLoginClient,
         MemberRepository memberRepository,
         JwtProvider jwtProvider
     ) {
-        this.kakaoLoginClient = kakaoLoginClient;
         this.memberRepository = memberRepository;
         this.jwtProvider = jwtProvider;
     }
 
-    public String processCallback(String code) {
-        KakaoLoginClient.KakaoTokenResponse kakaoToken = kakaoLoginClient.requestAccessToken(code);
-        KakaoLoginClient.KakaoUserResponse kakaoUser = kakaoLoginClient.requestUserInfo(kakaoToken.accessToken());
-        String email = kakaoUser.email();
-
+    @Transactional
+    public String loginOrRegister(String email, String kakaoAccessToken) {
         Member member = memberRepository.findByEmail(email)
             .orElseGet(() -> new Member(email));
-        member.updateKakaoAccessToken(kakaoToken.accessToken());
+        member.updateKakaoAccessToken(kakaoAccessToken);
         memberRepository.save(member);
-
         return jwtProvider.createToken(member.getEmail());
     }
 }
