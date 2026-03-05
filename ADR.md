@@ -77,3 +77,32 @@ Admin 컨트롤러(두 번째 소비자)가 생기면서 재사용 불가 문제
 |------|-----------|
 | 컨트롤러에 `@Transactional` 적용 | 프레젠테이션 계층이 트랜잭션을 관리하게 되어 계층 책임이 혼재 |
 | 201/200 구분 포기 | 기존 API 계약 변경, 클라이언트 영향 |
+
+---
+
+## ADR-004: 외부 API 호출을 트랜잭션 경계 밖으로 분리
+
+### 상태
+채택됨
+
+### 배경
+`KakaoAuthService.processCallback`에서 카카오 외부 API 호출(토큰 발급, 사용자 정보 조회)과 DB 작업(회원 조회/저장)이 하나의 `@Transactional` 안에 포함되어 있었다.
+외부 API가 느리거나 타임아웃되면 DB 커넥션을 불필요하게 오래 점유하고, API 실패 시 DB 작업까지 롤백되는 문제가 있었다.
+
+### 결정
+컨트롤러가 `KakaoLoginClient`를 직접 호출하여 외부 API 작업을 수행하고, 서비스는 DB 작업(`loginOrRegister`)만 담당한다.
+- `KakaoAuthController` — `KakaoLoginClient`로 토큰 발급·사용자 조회 후, `KakaoAuthService.loginOrRegister`로 DB 작업
+- `KakaoAuthService` — `KakaoLoginClient` 의존 제거, `@Transactional` DB 작업만 보유
+
+### 근거
+- 외부 API 호출은 네트워크 I/O이므로 트랜잭션과 무관해야 한다. DB 커넥션 점유 시간을 최소화할 수 있다.
+- `OrderController`에서 카카오 메시지 전송을 트랜잭션 밖에서 처리하는 기존 패턴과 일관성을 맞출 수 있다.
+- 서비스에 위임 메서드(`getKakaoToken`, `getKakaoEmail`)를 두는 방안도 검토했으나, 비즈니스 로직 없이 클라이언트를 그대로 호출하는 것이므로 불필요한 간접 계층이다. 컨트롤러가 직접 클라이언트를 호출하면 서비스의 역할이 DB 작업으로 명확해진다.
+
+### 고려했던 대안
+
+| 대안 | 기각 이유 |
+|------|-----------|
+| 서비스에 위임 메서드로 외부 호출 분리 | 비즈니스 로직 없이 클라이언트를 그대로 호출하는 불필요한 간접 계층 |
+| 같은 서비스 내 private 메서드 분리 + `@Transactional` | Spring AOP 프록시 미적용으로 트랜잭션 경계가 동작하지 않음 |
+| `TransactionTemplate` 사용 | 선언적 트랜잭션과 혼용되어 코드 일관성 저하 |
