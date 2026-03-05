@@ -212,3 +212,46 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 
 ### 8. open-in-view=false 검증 테스트 추가
 `OpenInViewTest`를 추가하여 LAZY 컬렉션(`Product.options`)을 트랜잭션 밖에서 접근 시 `LazyInitializationException`이 발생하는 것을 검증했다.
+
+### 9. Admin Role 체계 및 접근 제어 도입
+`Member`에 `Role`(USER/ADMIN) 필드를 추가하고, `AdminInterceptor`로 `/admin/**` 경로를 세션 기반으로 보호한다.
+
+## 작동 변경 증거 목록
+
+> **원칙: 작동 변경은 반드시 증거와 함께 제출한다.**
+> 예외가 발생하는지만 확인하는 것으로 충분하지 않다. 상태를 재조회하거나 결과를 관찰 가능한 방식으로 검증해야 한다.
+
+### 새 기능 · 동작 변경
+
+| 작동 변경 | 증거 (테스트) | 검증 방식 |
+|-----------|--------------|-----------|
+| 주문 생성 시 위시 자동 삭제 (`85fa303`) | `주문_생성_성공_위시_자동_삭제` | 주문 후 위시 목록 재조회 → `hasSize(0)` 확인 |
+| 옵션 수정 API 구현 (`cb6683f`) | `옵션_수정_성공` 외 4개 | 수정 응답에서 변경된 name·quantity 값 확인, 이름 중복·존재하지 않는 옵션 등 실패 케이스 상태코드 확인 |
+| 상품 카테고리 필터링 (`ed63978`) | `상품_목록_조회_카테고리_필터링` 외 1개 | 카테고리별 조회 결과 건수·totalElements 확인, 페이지네이션 조합 검증 |
+| GlobalExceptionHandler 상태코드 수정 (`93f6f0e`) | `ad3ff0a` 테스트 기대값 보정 | 재고 부족 500→400, 포인트 부족 500→400, 타인 위시 삭제 500→403 상태코드 확인 |
+| 에러 메시지 한글 통일 (`3603f3d`) | 기존 `MemberAcceptanceTest` 10개 케이스 | 로그인·회원가입 성공/실패 시나리오 전체 통과 확인 |
+| Admin 접근 제어 (`b86bfb3`) | `AdminAuthAcceptanceTest` 7개 케이스 | 미인증 시 302 리다이렉트, 로그인 후 세션으로 200 접근, 일반 유저 거부, 로그아웃 후 재접근 302 차단 |
+
+### 구조 변경 (작동 유지)
+
+구조를 바꾸되 외부 동작은 유지한 변경. 기존 인수 테스트가 증거 역할을 한다.
+
+| 구조 변경 | 증거 (기존 인수 테스트) | 검증 방식 |
+|-----------|----------------------|-----------|
+| Service 계층 추출 — AdminMemberController → MemberService (`7101646`, `31d95e9`) | `MemberAcceptanceTest` 10개 케이스 | 회원가입·로그인 성공/실패, 토큰 발급 확인 |
+| Service 계층 추출 — AdminProductController → ProductService (`6a199ff`, `15a785c`) | `ProductAcceptanceTest` 14개 케이스 | 상품 CRUD 전체, 페이지네이션·정렬·필터링 결과 확인 |
+| Service 반환 타입 DTO→엔티티 — CategoryService (`765106b`) | `CategoryAcceptanceTest` | 카테고리 CRUD 응답 필드 값 확인 |
+| Service 반환 타입 DTO→엔티티 — MemberService (`d76a7dc`) | `MemberAcceptanceTest` | 로그인·회원가입 토큰 반환 확인 |
+| Service 반환 타입 DTO→엔티티 — OptionService (`38764b4`) | `OptionAcceptanceTest` | 옵션 CRUD 응답 필드 값 확인 |
+| Service 반환 타입 DTO→엔티티 — ProductService (`808aad4`) | `ProductAcceptanceTest` | 상품 조회 응답 id·name·price·categoryId 확인 |
+| Service 반환 타입 DTO→엔티티 — WishService (`eb45a49`) | `WishAcceptanceTest` | 위시 추가·삭제·목록 조회 결과 확인 |
+| Service 반환 타입 변경 — KakaoAuthService (`40b51f9`) | `KakaoAuthAcceptanceTest` | 카카오 로그인 리다이렉트 URL 확인 |
+| HandlerMethodArgumentResolver 도입 (`480b492`) | `OrderAcceptanceTest`, `WishAcceptanceTest` | Bearer 토큰 인증 후 주문·위시 CRUD 전체 통과 확인 |
+| 위시 트랜잭션 통합 (`8c76d00`) | `WishAcceptanceTest` | 위시 추가 시 201(신규)/200(중복) 상태코드 및 목록 재조회 확인 |
+| KakaoAuth 외부 API 트랜잭션 분리 (`b264a1b`) | `KakaoAuthAcceptanceTest` | 카카오 로그인 흐름 정상 동작 확인 |
+| AdminProduct 트랜잭션 분리 제거 (`0ce299c`) | `ProductAcceptanceTest` | 상품 수정 후 응답 값 확인 |
+| 비밀번호 비교 → Member.authenticate() (`236fbe4`) | `MemberAcceptanceTest` | 로그인 성공·비밀번호 불일치 시나리오 확인 |
+| 소유권 검증 → Wish.validateOwnership() (`ebbcb77`) | `WishAcceptanceTest` | 타인 위시 삭제 시 403 상태코드 확인 |
+| 가격 계산 → Order.calculatePrice() (`bc704c5`) | `OrderAcceptanceTest` | 주문 후 포인트 차감 금액 재조회 확인 |
+| wish 삭제 → WishService 위임 (`80d246d`) | `OrderAcceptanceTest` | 주문 생성 후 위시 자동 삭제 재조회 확인 |
+| Admin 서비스 메서드 네이밍 (`d32ddbf`, `84964df`, `da9923a`) | `ProductAcceptanceTest`, `MemberAcceptanceTest` | 기존 API 응답 값 전체 통과 확인 |
