@@ -296,6 +296,36 @@ class OrderAcceptanceTest {
     }
 
     @Test
+    void 주문_생성_성공_위시_자동_삭제() {
+        // given
+        String token = registerAndGetToken("user@example.com");
+        Long categoryId = createCategory();
+        Long productId = createProduct(categoryId, 1000);
+        Long optionId = createOption(productId, "기본", 100);
+        chargePoint("user@example.com", 10000);
+        addWish(token, productId);
+
+        // when
+        given()
+            .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + token)
+            .body(Map.of("optionId", optionId, "quantity", 1, "message", ""))
+            .when()
+            .post("/api/orders")
+            .then()
+            .statusCode(201);
+
+        // then — 위시가 삭제되었는지 확인
+        given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get("/api/wishes")
+            .then()
+            .statusCode(200)
+            .body("content", hasSize(0));
+    }
+
+    @Test
     void 주문_생성_실패_존재하지_않는_옵션() {
         // given
         String token = registerAndGetToken("user@example.com");
