@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ public class WishController {
         // check auth
         Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(wishService.findByMemberId(member.getId(), pageable).map(WishResponse::from));
     }
@@ -50,7 +51,7 @@ public class WishController {
         // check auth
         Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         WishResult result = wishService.add(member.getId(), request);
@@ -71,7 +72,7 @@ public class WishController {
         // check auth
         Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         wishService.remove(member.getId(), id);
         return ResponseEntity.noContent().build();

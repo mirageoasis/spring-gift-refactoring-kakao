@@ -3,6 +3,7 @@ package gift.order;
 import java.net.URI;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,7 @@ public class OrderController {
         // auth check
         Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(orderService.findByMemberId(member.getId(), pageable));
     }
@@ -62,7 +63,7 @@ public class OrderController {
         // auth check
         Member member = authenticationResolver.extractMember(authorization);
         if (member == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         Order order = orderService.create(member, request);
