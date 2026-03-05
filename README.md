@@ -10,14 +10,14 @@
 |--------|------|------|
 | `DELETE` | `/api/categories/{id}` | 카테고리 삭제 |
 
-## User API / Admin API 구분
+## User API / Admin API 네이밍 규칙
 
-`ProductService`는 동일한 상품 조회를 두 가지 메서드로 제공한다.
+Service 메서드는 `admin` 접두어로 호출처를 구분한다.
 
-| 메서드 | 호출처 | 에러 메시지 | 이유 |
+| 네이밍 | 호출처 | 에러 메시지 | 이유 |
 |--------|--------|-------------|------|
-| `findById(id)` | REST API (`ProductController`) | `"상품이 존재하지 않습니다."` | 사용자에게 노출되는 메시지이므로 내부 정보를 숨김 |
-| `getById(id)` | Admin (`AdminProductController`) | `"상품이 존재하지 않습니다. id=123"` | 관리자 디버깅용으로 id를 포함 |
+| `findById(id)` | REST API (`ProductController`) | `"상품이 존재하지 않습니다."` | 사용자에게 노출되므로 내부 정보를 숨김 |
+| `adminFindById(id)` | Admin (`AdminProductController`) | `"상품이 존재하지 않습니다. id=123"` | 관리자 디버깅용으로 id를 포함 |
 
 ## 사용한 Claude Code 스킬
 

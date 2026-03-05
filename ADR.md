@@ -106,3 +106,36 @@ Admin 컨트롤러(두 번째 소비자)가 생기면서 재사용 불가 문제
 | 서비스에 위임 메서드로 외부 호출 분리 | 비즈니스 로직 없이 클라이언트를 그대로 호출하는 불필요한 간접 계층 |
 | 같은 서비스 내 private 메서드 분리 + `@Transactional` | Spring AOP 프록시 미적용으로 트랜잭션 경계가 동작하지 않음 |
 | `TransactionTemplate` 사용 | 선언적 트랜잭션과 혼용되어 코드 일관성 저하 |
+
+---
+
+## ADR-005: Admin/User API 서비스 메서드 네이밍 규칙 — `admin` 접두어
+
+### 상태
+채택됨
+
+### 배경
+`ProductService`와 `MemberService`에 동일한 조회 로직이지만 에러 메시지가 다른 메서드 쌍이 존재했다.
+User API용은 내부 정보를 숨긴 메시지(`"상품이 존재하지 않습니다."`)를, Admin용은 디버깅을 위해 id를 포함한 메시지(`"상품이 존재하지 않습니다. id=123"`)를 사용한다.
+초기에는 `findById` / `getById`로 구분했으나, 코드를 처음 보는 사람이 어느 쪽이 Admin용인지 알 수 없었다.
+
+### 결정
+Admin에서만 호출하는 서비스 메서드에는 `admin` 접두어를 붙인다.
+
+| 호출처 | 네이밍 | 예시 |
+|--------|--------|------|
+| REST API (User) | `findById()`, `findCategory()` | `ProductService.findById(id)` |
+| Admin | `adminFindById()`, `adminFindCategory()` | `ProductService.adminFindById(id)` |
+
+### 근거
+- 메서드명만으로 호출처가 즉시 구분된다. `find` vs `get` 같은 암묵적 컨벤션에 의존하지 않는다.
+- 별도 AdminService를 만들지 않는 기존 결정(ADR-001)을 유지하면서도 Admin용 메서드를 명시적으로 식별할 수 있다.
+- IDE에서 `admin`으로 검색하면 Admin 전용 메서드를 한 번에 찾을 수 있다.
+
+### 고려했던 대안
+
+| 대안 | 기각 이유 |
+|------|-----------|
+| `find` vs `get` 구분 | 암묵적이라 코드를 처음 보는 사람이 규칙을 모름 |
+| `ControllerAdvice`에서 에러 메시지 분기 | 메서드는 하나로 줄지만 ControllerAdvice 복잡도 증가 |
+| 별도 `AdminProductService` | ADR-001에서 이미 기각 — 중복 주입, 검증 로직 중복 |
