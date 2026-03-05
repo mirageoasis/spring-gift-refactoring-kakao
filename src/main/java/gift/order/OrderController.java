@@ -3,16 +3,14 @@ package gift.order;
 import java.net.URI;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import gift.auth.AuthenticationResolver;
+import gift.auth.AuthenticatedMember;
 import gift.member.Member;
 import gift.product.Product;
 import jakarta.validation.Valid;
@@ -21,29 +19,21 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;
-    private final AuthenticationResolver authenticationResolver;
     private final KakaoMessageClient kakaoMessageClient;
 
     public OrderController(
         OrderService orderService,
-        AuthenticationResolver authenticationResolver,
         KakaoMessageClient kakaoMessageClient
     ) {
         this.orderService = orderService;
-        this.authenticationResolver = authenticationResolver;
         this.kakaoMessageClient = kakaoMessageClient;
     }
 
     @GetMapping
     public ResponseEntity<?> getOrders(
-        @RequestHeader("Authorization") String authorization,
+        @AuthenticatedMember Member member,
         Pageable pageable
     ) {
-        // auth check
-        Member member = authenticationResolver.extractMember(authorization);
-        if (member == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return ResponseEntity.ok(orderService.findByMemberId(member.getId(), pageable));
     }
 
@@ -57,15 +47,9 @@ public class OrderController {
     // 7. send kakao notification
     @PostMapping
     public ResponseEntity<?> createOrder(
-        @RequestHeader("Authorization") String authorization,
+        @AuthenticatedMember Member member,
         @Valid @RequestBody OrderRequest request
     ) {
-        // auth check
-        Member member = authenticationResolver.extractMember(authorization);
-        if (member == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         Order order = orderService.create(member, request);
 
         // best-effort kakao notification (outside transaction)
