@@ -200,5 +200,14 @@ RestAssured 기반 인수 테스트를 전 API에 대해 작성했다.
 ### 6. 카카오 알림 트랜잭션 밖 분리
 `OrderService.create()` 안에 있던 `sendKakaoMessageIfPossible()`을 `OrderController`로 이동하여 트랜잭션 커밋 후 실행되도록 변경했다. `KakaoMessageClient` 의존성도 `OrderService`에서 `OrderController`로 이동.
 
-### 7. open-in-view=false 검증 테스트 추가
+### 7. 도메인 책임 되찾기
+서비스에 누수되어 있던 비즈니스 로직을 엔티티로 이동했다.
+
+| 변경 전 (Service) | 변경 후 (Entity) | 이유 |
+|-------------------|-----------------|------|
+| `MemberService`에서 `getPassword()` 꺼내 비교 | `Member.authenticate(password)` | 비밀번호 일치 판단은 Member 자신의 책임 |
+| `WishService`에서 `getMemberId()` 꺼내 비교 | `Wish.validateOwnership(memberId)` | 소유권 판단은 Wish 자신의 책임 |
+| `OrderService`에서 `getPrice() * quantity` 계산 | `Order.calculatePrice()` | 주문 총액 계산은 Order의 책임 |
+
+### 8. open-in-view=false 검증 테스트 추가
 `OpenInViewTest`를 추가하여 LAZY 컬렉션(`Product.options`)을 트랜잭션 밖에서 접근 시 `LazyInitializationException`이 발생하는 것을 검증했다.
