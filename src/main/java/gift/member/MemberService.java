@@ -45,7 +45,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Member findById(Long id) {
+    public Member getById(Long id) {
         return memberRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다. id=" + id));
     }
@@ -58,12 +58,12 @@ public class MemberService {
     }
 
     public void update(Long id, String email, String password) {
-        Member member = findById(id);
+        Member member = getById(id);
         member.update(email, password);
     }
 
     public void chargePoint(Long id, int amount) {
-        Member member = findById(id);
+        Member member = getById(id);
         member.chargePoint(amount);
     }
 
