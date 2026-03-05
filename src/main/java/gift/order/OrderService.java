@@ -53,6 +53,12 @@ public class OrderService {
         memberRepository.save(member);
 
         // save order
-        return orderRepository.save(new Order(option, member.getId(), request.quantity(), request.message()));
+        Order order = orderRepository.save(new Order(option, member.getId(), request.quantity(), request.message()));
+
+        // cleanup wish
+        wishRepository.findByMemberIdAndProductId(member.getId(), option.getProduct().getId())
+            .ifPresent(wishRepository::delete);
+
+        return order;
     }
 }
