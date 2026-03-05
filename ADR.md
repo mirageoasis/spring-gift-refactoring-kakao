@@ -179,3 +179,32 @@ Service 계층을 도입(ADR-001)하면서 Controller에 있던 로직이 Servic
 | 항목 | 보류 이유 |
 |------|-----------|
 | `MemberService` 이메일 중복 검사 — `register()`와 `create()`에 동일 로직 반복 | 호출처가 2곳뿐이라 공통 메서드 추출의 실익이 작음. 호출처가 늘어나면 재검토 |
+
+---
+
+## ADR-007: Admin 접근 제어 — HandlerInterceptor 방식
+
+### 상태
+채택됨
+
+### 배경
+`/admin/**` 경로에 접근 제어가 없어 누구나 Admin 페이지에 접근 가능했다.
+Admin 페이지는 Thymeleaf MVC 기반이므로 브라우저 세션 인증이 자연스럽다.
+
+### 결정
+- `Member`에 `Role` enum 필드(USER, ADMIN)를 추가한다.
+- `AdminInterceptor`(`HandlerInterceptor`)가 `/admin/**` 요청의 세션에서 `adminMemberId`를 확인한다.
+- `AdminAuthController`가 세션 기반 로그인/로그아웃을 처리한다.
+
+### 근거
+- **추가 의존성 없음**: 기존 `WebMvcConfig`에 인터셉터를 등록하면 되므로 Spring Security 같은 외부 라이브러리가 불필요하다.
+- **경로 기반 적용**: `addPathPatterns("/admin/**")`으로 Admin 경로만 선택적으로 보호할 수 있다.
+- **기존 인증과 분리**: REST API는 JWT(`AuthenticatedMemberArgumentResolver`), Admin은 세션으로 인증 방식이 다르므로 별도 메커니즘이 적절하다.
+
+### 고려했던 대안
+
+| 대안 | 기각 이유 |
+|------|-----------|
+| Spring Security | Admin 페이지 보호만을 위해 도입하기엔 설정 복잡도와 학습 비용이 과다 |
+| AOP (`@Aspect`) | 경로 패턴 기반 적용이 불가능하고, 컨트롤러 메서드마다 어노테이션 필요 |
+| Servlet Filter | Spring MVC의 `InterceptorRegistry`로 경로 패턴·제외 패턴을 선언적으로 관리할 수 없음 |
