@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -26,8 +27,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getProducts(Pageable pageable) {
-        return ResponseEntity.ok(productService.findAll(pageable).map(ProductResponse::from));
+    public ResponseEntity<Page<ProductResponse>> getProducts(
+        @RequestParam(required = false) Long categoryId,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(productService.findProducts(categoryId, pageable).map(ProductResponse::from));
     }
 
     @GetMapping("/{id}")

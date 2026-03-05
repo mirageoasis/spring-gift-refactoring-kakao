@@ -23,7 +23,10 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Product> findAll(Pageable pageable) {
+    public Page<Product> findProducts(Long categoryId, Pageable pageable) {
+        if (categoryId != null) {
+            return productRepository.findByCategoryId(categoryId, pageable);
+        }
         return productRepository.findAll(pageable);
     }
 
